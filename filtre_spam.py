@@ -1,7 +1,9 @@
 import os
 import nltk
 import string
+
 from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
     lambda_value = 50+.0
@@ -9,43 +11,40 @@ def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
     werr_base = n_spam / (lambda_value * n_ham + n_spam)
     return werr_base / werr
 
-mailDir  = "./mails/PROVA"
+def neteja_paraules(llista_paraules):
+    llista_paraules_lower = [token.lower() for token in llista_paraules]
+    clean_string = llista_paraules_lower
+    stop_words = set(stopwords.words('english'))
+    signes_puntuacio = string.punctuation
+
+    clean_string = [token for token in llista_paraules_lower if not token in stop_words]
+    clean_string = [token.translate(None, signes_puntuacio) for token in clean_string if not token in signes_puntuacio]
+
+    return clean_string        
+
+
+mailDir  = "./mails/HAM"
 
 mails = []
-mails2 = []
 for directory, subdirs, files in os.walk(mailDir):
     for filename in files:
         filepath = os.path.join(directory, filename)
-        mails2.extend(open(filepath, "rb").read().split())
+        mails.extend(open(filepath, "rb").read().split())
 
 
+llista_paraules_neta = neteja_paraules(mails)
 
-clean_tokens = mails2
-sr = stopwords.words('english')
-
-
-
-for s in mails2:
-    mails.append(s.translate(None, string.punctuation))
-
-# for token in mails:
-#     if token not in sr and token not in string.punctuation and token not in string.digits:
-#         #print(token)
-#         clean_tokens.append(token)
-
-# |X| -> mida del vocabulari
-# count(xi) -> nombre de ocurrencies d'una paraula
-# N -> nombre de paraules entre tots els correus
-
-for token in mails:
-    if token in sr and token in string.punctuation and token  in string.digits:
-        #print(token)
-        clean_tokens.remove(token)
-
-freq = nltk.FreqDist(clean_tokens)
+freq = nltk.FreqDist(llista_paraules_neta)
 for key,val in freq.items():
-    print (str(key) + ':' + str(val))
+    print (str(key) + ' : ' + str(val))
+
+print ("Mida llista paraules neta ==> " + str(len( llista_paraules_neta)))
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
 #print(len(mails))
+
+
+# |X| -> mida del vocabulari
+# count(xi) -> nombre de ocurrencies d'una paraula
+# N -> nombre de paraules entre tots els correus
