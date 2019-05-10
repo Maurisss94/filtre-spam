@@ -1,6 +1,10 @@
+#!/usr/bin/python3
+
+# IMPORTANT: EXECUTAR AMB VERSIÓ 3 DE PYTHON
 import os
 import nltk
 import string
+import codecs
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -18,27 +22,33 @@ def neteja_paraules(llista_paraules):
     signes_puntuacio = string.punctuation
 
     clean_string = [token for token in llista_paraules_lower if not token in stop_words]
-    clean_string = [token.translate(None, signes_puntuacio) for token in clean_string if not token in signes_puntuacio]
+    clean_string = [token.translate(signes_puntuacio) for token in clean_string if not token in signes_puntuacio]
+    clean_string = [token for token in clean_string if not token.isnumeric()]
 
     return clean_string        
 
 
-mailDir  = "./mails/HAM"
-
+# Lectura de fitxers del directori mailDir
+mailDir  = "./mails/SPAM"
 mails = []
+mida_vocabulari = 0
+nombre_paraules_correus = 0
 for directory, subdirs, files in os.walk(mailDir):
     for filename in files:
         filepath = os.path.join(directory, filename)
-        mails.extend(open(filepath, "rb").read().split())
+        mails.extend(codecs.open(filepath, "rb", "latin-1").read().split())
 
 
 llista_paraules_neta = neteja_paraules(mails)
 
-freq = nltk.FreqDist(llista_paraules_neta)
-for key,val in freq.items():
+frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
+mida_vocabulari = len(frequencia_paraules.items())
+for key,val in frequencia_paraules.most_common(100):
     print (str(key) + ' : ' + str(val))
 
-print ("Mida llista paraules neta ==> " + str(len( llista_paraules_neta)))
+print ("")
+print ("Nombre de paruales correus ==> " + str(len( llista_paraules_neta)))
+print ("Mida vocabulari = " + str(mida_vocabulari))
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
