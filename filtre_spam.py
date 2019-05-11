@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # IMPORTANT: EXECUTAR AMB VERSIÓ 3 DE PYTHON
+import constants
 import os
 import nltk
 import string
@@ -29,7 +30,7 @@ def neteja_paraules(llista_paraules):
 
 
 # Lectura de fitxers del directori mailDir
-mailDir  = "./mails/SPAM"
+mailDir  = "./mails/ENTRENAMENT"
 mails = []
 mida_vocabulari = 0
 nombre_paraules_correus = 0
@@ -49,6 +50,8 @@ for key,val in frequencia_paraules.most_common(100):
 print ("")
 print ("Nombre de paruales correus ==> " + str(len( llista_paraules_neta)))
 print ("Mida vocabulari = " + str(mida_vocabulari))
+print (constants.K)
+print (constants.PHI)
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
