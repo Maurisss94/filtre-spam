@@ -52,21 +52,18 @@ def generar_bagofwords(sentence, words):
         for i,word in enumerate(words):
             if word == sw: 
                 bag[i] += 1
+    return np.array(bag)        
 
-<<<<<<< HEAD
 def calcular_probabilitat(word, llista_paraules,N,K):
     # p(x) = (count+K)/(N+(K*|x|))
     prob = (llista_paraules[word] + K)/(N+(K*len(llista_paraules.items())))
     return prob
-=======
-    return np.array(bag)        
 
 def probabilitat_spam():
     return ((n_missatges_spam + constants.K)/(n_missatges + (constants.K*2)))
     
 def probabilitat_ham():
     return ((n_missatges_ham + constants.K)/(n_missatges + (constants.K*2)))    
->>>>>>> df375fea36ed8f75e5fdd3306f2c100c15bf9fa7
 
 # Lectura de fitxers del directori mailDir
 for directory, subdirs, files in os.walk(mailDir):
@@ -88,18 +85,16 @@ n_missatges = len(llista_paraules_neta_ham) + len(llista_paraules_neta_spam)
 #bag_of_words = generar_bagofwords("Subject, Subject, Subject hola day, people enron enron hola hola", list(frequencia_paraules.keys()))
 
 
-<<<<<<< HEAD
-llista_paraules_neta = neteja_paraules(mails)
-nombre_paraules_correus = len( llista_paraules_neta)
-frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
-mida_vocabulari = len(frequencia_paraules.items())
-for key,val in frequencia_paraules.most_common(100):
-    print (str(key) + ' : ' + str(val))
+#llista_paraules_neta = neteja_paraules(mails)
+nombre_paraules_correus = len( llista_paraules_neta_ham)
+#frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
+#mida_vocabulari = len(frequencia_paraules.items())
+#for key,val in frequencia_paraules.most_common(100):
+#    print (str(key) + ' : ' + str(val))
 
 print ("")
 print ("Nombre de paruales correus ==> " + str(nombre_paraules_correus))
-print ("Mida vocabulari = " + str(mida_vocabulari))
-=======
+#print ("Mida vocabulari = " + str(mida_vocabulari))
 print ("missatges SPAM = " + str(n_missatges_spam))
 print ("missatges HAM = " + str(n_missatges_ham))
 print ("missatges TOTALS = " + str(n_missatges))
@@ -110,7 +105,6 @@ print ("PROBABILITAT HAM = " + str(probabilitat_ham()))
 # for key,val in frequencia_paraules.items():
 #     print (str(key) + ' : ' + str(val))
 
->>>>>>> df375fea36ed8f75e5fdd3306f2c100c15bf9fa7
 
 prob = calcular_probabilitat("office",frequencia_paraules, nombre_paraules_correus,1)
 print(str(prob))
