@@ -27,6 +27,10 @@ def neteja_paraules(llista_paraules):
 
     return clean_string        
 
+def calcular_probabilitat(word, llista_paraules,N,K):
+    # p(x) = (count+K)/(N+(K*|x|))
+    prob = (llista_paraules[word] + K)/(N+(K*len(llista_paraules.items())))
+    return prob
 
 # Lectura de fitxers del directori mailDir
 mailDir  = "./mails/SPAM"
@@ -40,15 +44,18 @@ for directory, subdirs, files in os.walk(mailDir):
 
 
 llista_paraules_neta = neteja_paraules(mails)
-
+nombre_paraules_correus = len( llista_paraules_neta)
 frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
 mida_vocabulari = len(frequencia_paraules.items())
 for key,val in frequencia_paraules.most_common(100):
     print (str(key) + ' : ' + str(val))
 
 print ("")
-print ("Nombre de paruales correus ==> " + str(len( llista_paraules_neta)))
+print ("Nombre de paruales correus ==> " + str(nombre_paraules_correus))
 print ("Mida vocabulari = " + str(mida_vocabulari))
+
+prob = calcular_probabilitat("office",frequencia_paraules, nombre_paraules_correus,1)
+print(str(prob))
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
