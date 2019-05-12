@@ -35,7 +35,7 @@ def neteja_paraules(llista_paraules):
     llista_paraules_lower = [token.lower() for token in llista_paraules]
     clean_string = llista_paraules_lower
     stop_words = set(stopwords.words('english'))
-    signes_puntuacio = set(string.punctuation + '')
+    #signes_puntuacio = set(string.punctuation + '')
 
     clean_string = [token for token in llista_paraules_lower if not token in stop_words]
     clean_string = [token for token in clean_string if not token.isnumeric()]
@@ -54,9 +54,9 @@ def generar_bagofwords(sentence, words):
                 bag[i] += 1
     return np.array(bag)        
 
-def calcular_probabilitat(word, llista_paraules,N,K):
+def calcular_probabilitat(word, llista_paraules,N):
     # p(x) = (count+K)/(N+(K*|x|))
-    prob = (llista_paraules[word] + K)/(N+(K*len(llista_paraules.items())))
+    prob = (llista_paraules[word] + constants.K)/(N+(constants.K*len(llista_paraules.items())))
     return prob
 
 def probabilitat_spam():
@@ -82,11 +82,17 @@ n_missatges_ham = len(llista_paraules_neta_ham)
 n_missatges_spam = len(llista_paraules_neta_spam)
 n_missatges = len(llista_paraules_neta_ham) + len(llista_paraules_neta_spam)
 
-#bag_of_words = generar_bagofwords("Subject, Subject, Subject hola day, people enron enron hola hola", list(frequencia_paraules.keys()))
+bag_of_words = generar_bagofwords("Subject, Subject, Subject hello day, people enron enron hello hello", list(frequencia_paraules.keys()))
+
+#com saps quina és la paraula?¿
+print("valors bagOfWords:")
+for x in range(len(bag_of_words)):
+    if bag_of_words[x]!=0: 
+        print(bag_of_words[x])
 
 
 #llista_paraules_neta = neteja_paraules(mails)
-nombre_paraules_correus = len( llista_paraules_neta_ham)
+nombre_paraules_correus = len(llista_paraules_neta_ham) + len(llista_paraules_neta_spam)
 #frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
 #mida_vocabulari = len(frequencia_paraules.items())
 #for key,val in frequencia_paraules.most_common(100):
@@ -106,8 +112,8 @@ print ("PROBABILITAT HAM = " + str(probabilitat_ham()))
 #     print (str(key) + ' : ' + str(val))
 
 
-prob = calcular_probabilitat("office",frequencia_paraules, nombre_paraules_correus,1)
-print(str(prob))
+#prob = calcular_probabilitat("office",frequencia_paraules, nombre_paraules_correus,1)
+#print(str(prob))
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
