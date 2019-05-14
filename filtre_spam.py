@@ -15,6 +15,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 #Definició de varibales globals
 mailDir  = "./mails/ENTRENAMENT"
+validacioDir  = "./mails/VALIDACIO"
 mails_ham = []
 mails_spam = []
 nombre_paraules_correus = 0
@@ -53,16 +54,34 @@ def probabilitat_spam():
     return ((n_missatges_spam + constants.K)/(nombre_paraules_correus + (constants.K*2)))
     
 def probabilitat_ham():
-    return ((n_missatges_ham + constants.K)/(nombre_paraules_correus + (constants.K*2)))    
+    return ((n_missatges_ham + constants.K)/(nombre_paraules_correus + (constants.K*2)))
+
+def obtenir_paraules_correu(filename):
+    return (codecs.open(filename, "rb", "latin-1").read().split())
+
+def calcular_estadistics(n_missatges_ham, n_missatges_spam, true_positiu, fals_positiu, true_negatiu, fals_negatiu):
+    missatges_totals = (n_missatges_ham + n_missatges_spam)
+    accuracy = 0.0
+    fals_positiu_rate = (fals_positiu/missatges_totals)*100
+    fals_negatiu_rate = (fals_negatiu/missatges_totals)*100
+    tct = total_cost_ratio(fals_positiu, fals_negatiu, n_missatges_ham, n_missatges_spam)
+    print ("-------------------- RESULTATS ---------------------")
+    print ("Nombre de missatges: \t" + str(missatges_totals) + "\t (" + str(n_missatges_ham) + "H," + str(n_missatges_spam) + "S)")
+    print ("Accuracy (%): \t " + str(accuracy))
+    print ("False positive rate (%): \t" + str(fals_positiu_rate) + "\t (" + str(fals_positiu) + ")")
+    print ("False negative rate (%): \t" + str(fals_negatiu_rate) + "\t (" + str(fals_negatiu) + ")")
+    print ("Total cost ratio (l = 50): \t" + str(tct))
+    print ("----------------------------------------------------")
+
 
 # Lectura de fitxers del directori mailDir
 for directory, subdirs, files in os.walk(mailDir):
     for filename in files:
         filepath = os.path.join(directory, filename)
         if "SPAM" in filename.upper():
-            mails_spam.extend(codecs.open(filepath, "rb", "latin-1").read().split())
+            mails_spam.extend(obtenir_paraules_correu(filepath))
         elif "HAM" in filename.upper():
-            mails_ham.extend(codecs.open(filepath, "rb", "latin-1").read().split())
+            mails_ham.extend(obtenir_paraules_correu(filepath))
 
 llista_paraules_neta_ham = neteja_paraules(mails_ham) #totes les paraules que apareixen a ham
 llista_paraules_neta_spam = neteja_paraules(mails_spam) #totes les paraules que apareixen a spam
@@ -76,8 +95,8 @@ nombre_paraules_correus = n_missatges_ham + n_missatges_spam # nombre total de p
 
 mida_vocabulari = len(frequencia_paraules_spam.items())+len(frequencia_paraules_ham.items()) #mida total del vocabulari
 
-for key,val in frequencia_paraules_ham.items():
-    print (str(key) + ' : ' + str(val))
+#for key,val in frequencia_paraules_spam.items():
+    #print (str(key) + ' : ' + str(val))
 
 print ("")
 print ("Nombre de paruales correus ==> " + str(nombre_paraules_correus))
@@ -98,6 +117,25 @@ prob2 = calcular_probabilitat("subject",frequencia_paraules_spam, mida_vocabular
 
 print(prob)
 print(prob2)
+
+# Per cada missatge de la carpeta validacioDir...
+validacio_paraules_spam = []
+validacio_paraules_ham = []
+es_spam = False
+for directory, subdirs, files in os.walk(validacioDir):
+    for filename in files:
+        filepath = os.path.join(directory, filename)
+        if "SPAM" in filename.upper():
+            validacio_paraules_spam = neteja_paraules(obtenir_paraules_correu(filepath))
+            es_spam = true
+            #Crida a metode de classificació
+        elif "HAM" in filename.upper():
+            validacio_paraules_ham = neteja_paraules(obtenir_paraules_correu(filepath))
+
+
+
+
+          
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
