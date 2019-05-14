@@ -17,7 +17,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 mailDir  = "./mails/ENTRENAMENT"
 mails_ham = []
 mails_spam = []
-n_missatges = 0
+nombre_paraules_correus = 0
 n_missatges_spam = 0
 n_missatges_ham = 0
 
@@ -44,26 +44,16 @@ def neteja_paraules(llista_paraules):
 
     return clean_string    
 
-def generar_bagofwords(sentence, words):
-    sentence_words = neteja_paraules(sentence.split())
-    # frequency word count
-    bag = np.zeros(len(words))
-    for sw in sentence_words:
-        for i,word in enumerate(words):
-            if word == sw: 
-                bag[i] += 1
-    return np.array(bag)        
-
-def calcular_probabilitat(word, llista_paraules,N):
+def calcular_probabilitat(word, llista_paraules,vocTotal,N):
     # p(x) = (count+K)/(N+(K*|x|))
-    prob = (llista_paraules[word] + constants.K)/(N+(constants.K*len(llista_paraules.items())))
+    prob = (llista_paraules[word] + constants.K)/(N+(constants.K*vocTotal))
     return prob
 
 def probabilitat_spam():
-    return ((n_missatges_spam + constants.K)/(n_missatges + (constants.K*2)))
+    return ((n_missatges_spam + constants.K)/(nombre_paraules_correus + (constants.K*2)))
     
 def probabilitat_ham():
-    return ((n_missatges_ham + constants.K)/(n_missatges + (constants.K*2)))    
+    return ((n_missatges_ham + constants.K)/(nombre_paraules_correus + (constants.K*2)))    
 
 # Lectura de fitxers del directori mailDir
 for directory, subdirs, files in os.walk(mailDir):
@@ -74,36 +64,27 @@ for directory, subdirs, files in os.walk(mailDir):
         elif "HAM" in filename.upper():
             mails_ham.extend(codecs.open(filepath, "rb", "latin-1").read().split())
 
-
-llista_paraules_neta_ham = neteja_paraules(mails_ham)
-llista_paraules_neta_spam = neteja_paraules(mails_spam)
-frequencia_paraules = nltk.FreqDist(llista_paraules_neta_ham)
-n_missatges_ham = len(llista_paraules_neta_ham)
-n_missatges_spam = len(llista_paraules_neta_spam)
-n_missatges = len(llista_paraules_neta_ham) + len(llista_paraules_neta_spam)
-
-bag_of_words = generar_bagofwords("Subject, Subject, Subject hello day, people enron enron hello hello", list(frequencia_paraules.keys()))
-
-#com saps quina és la paraula?¿
-print("valors bagOfWords:")
-for x in range(len(bag_of_words)):
-    if bag_of_words[x]!=0: 
-        print(bag_of_words[x])
+llista_paraules_neta_ham = neteja_paraules(mails_ham) #totes les paraules que apareixen a ham
+llista_paraules_neta_spam = neteja_paraules(mails_spam) #totes les paraules que apareixen a spam
 
 
-#llista_paraules_neta = neteja_paraules(mails)
-nombre_paraules_correus = len(llista_paraules_neta_ham) + len(llista_paraules_neta_spam)
-#frequencia_paraules = nltk.FreqDist(llista_paraules_neta)
-#mida_vocabulari = len(frequencia_paraules.items())
-#for key,val in frequencia_paraules.most_common(100):
-#    print (str(key) + ' : ' + str(val))
+frequencia_paraules_ham = nltk.FreqDist(llista_paraules_neta_ham) # mapa de les paraules i la seva frequencia HAM
+frequencia_paraules_spam = nltk.FreqDist(llista_paraules_neta_spam) # mapa de les paraules i la seva frequencia SPAM
+n_missatges_ham = len(llista_paraules_neta_ham) 
+n_missatges_spam = len(llista_paraules_neta_spam) 
+nombre_paraules_correus = n_missatges_ham + n_missatges_spam # nombre total de paraules no rep
+
+mida_vocabulari = len(frequencia_paraules_spam.items())+len(frequencia_paraules_ham.items()) #mida total del vocabulari
+
+for key,val in frequencia_paraules_ham.items():
+    print (str(key) + ' : ' + str(val))
 
 print ("")
 print ("Nombre de paruales correus ==> " + str(nombre_paraules_correus))
-#print ("Mida vocabulari = " + str(mida_vocabulari))
+print ("Mida vocabulari = " + str(mida_vocabulari))
 print ("missatges SPAM = " + str(n_missatges_spam))
 print ("missatges HAM = " + str(n_missatges_ham))
-print ("missatges TOTALS = " + str(n_missatges))
+print ("missatges TOTALS = " + str(nombre_paraules_correus))
 print ("PROBABILITAT SPAM = " + str(probabilitat_spam()))
 print ("PROBABILITAT HAM = " + str(probabilitat_ham()))
 
@@ -112,8 +93,11 @@ print ("PROBABILITAT HAM = " + str(probabilitat_ham()))
 #     print (str(key) + ' : ' + str(val))
 
 
-#prob = calcular_probabilitat("office",frequencia_paraules, nombre_paraules_correus,1)
-#print(str(prob))
+prob = calcular_probabilitat("subject",frequencia_paraules_ham, mida_vocabulari, len(llista_paraules_neta_ham)) #calcula la probabilitat de que office estigui a ham
+prob2 = calcular_probabilitat("subject",frequencia_paraules_spam, mida_vocabulari, len(llista_paraules_neta_spam)) #calcula la probabilitat de que office estigui a ham
+
+print(prob)
+print(prob2)
 
 #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
 #print(', '.join(mails))
@@ -123,3 +107,4 @@ print ("PROBABILITAT HAM = " + str(probabilitat_ham()))
 # |X| -> mida del vocabulari
 # count(xi) -> nombre de ocurrencies d'una paraula
 # N -> nombre de paraules entre tots els correus
+# N -> nombre de paraules de tot ham o spam
