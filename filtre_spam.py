@@ -8,6 +8,7 @@ import os, os.path
 import nltk
 import string
 import codecs
+import math
 import numpy as np
 
 from nltk.corpus import stopwords
@@ -44,10 +45,23 @@ def neteja_paraules(llista_paraules):
 
     return clean_string    
 
-def calcular_probabilitat(word, llista_paraules,vocTotal,N):
+def calcular_probabilitat(word, frequencia_paraules,vocTotal,N):
     # p(x) = (count+K)/(N+(K*|x|))
-    prob = (llista_paraules[word] + constants.K)/(N+(constants.K*vocTotal))
+    prob = (frequencia_paraules[word] + constants.K)/(N+(constants.K*vocTotal))
     return prob
+
+def metode_Bayes( conjunt_paraules_correu, frequencia_paraules_ham, frequencia_paraules_spam, vocTotal, NParaulesSpam, NParaulesHam):
+    
+    for word in conjunt_paraules_correu:
+        aux_spam += mat.log(calcular_probabilitat(word,frequencia_paraules_spam, mida_vocabulari, NParaulesSpam))
+        aux_ham += mat.log(calcular_probabilitat(word,frequencia_paraules_ham, mida_vocabulari, NParaulesHam))
+    aux_spam += mat.log(probabilitat_spam())
+    aux_ham += mat.log(probabilitat_ham())
+
+    prob_spam = aux_spam/(aux_ham+aux_spam)
+    prob_ham = aux_ham/(aux_ham+aux_spam)
+    return prob_spam > (prob_ham*constants.PHI)
+
 
 def probabilitat_spam():
     return ((n_missatges_spam + constants.K)/(nombre_paraules_correus + (constants.K*2)))
@@ -108,3 +122,17 @@ print(prob2)
 # count(xi) -> nombre de ocurrencies d'una paraula
 # N -> nombre de paraules entre tots els correus
 # N -> nombre de paraules de tot ham o spam
+
+true_positiu = 0
+false_positiu = 0
+true_negatiu = 0
+false_negatiu = 0
+
+if es_spam and bayes:
+    true_positiu+=1
+elif not es_spam and bayes:
+    false_positiu+=1
+elif es_spam and not bayes:
+    true_negatiu+=1
+else:
+    false_negatiu+=1
