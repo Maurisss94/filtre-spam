@@ -21,10 +21,8 @@ mailDir  = "./mails/ENTRENAMENT"
 validacioDir  = "./mails/VALIDACIO"
 mails_ham = []
 mails_spam = []
-nombre_paraules_correus = 0
-n_missatges_spam = 0
-n_missatges_ham = 0
 
+#calcula el costRatio a partir del fals positiu, el fals negatiu, el nombre de missatges de ham i spam
 def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
     lambda_value = 50.0
     werr = (lambda_value * false_positive + false_negative) / (lambda_value * n_ham + n_spam)
@@ -33,16 +31,17 @@ def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
     werr_base = n_spam / (lambda_value * n_ham + n_spam)
     return (werr_base / werr)
 
+#elimina els signes de puntuació de l'string
 def eliminar_puntuacio(string_eliminar):
     exclude = set(string.punctuation)
     return ''.join(ch for ch in string_eliminar if ch not in exclude)
 
+#neteja de llista_paraules els simbols de puntuacio, els números, els tokens (anglesos)
 def neteja_paraules(llista_paraules):
     llista_paraules_lower = [token.lower() for token in llista_paraules]
     clean_string = llista_paraules_lower
     stop_words = set(stopwords.words('english'))
     st = WordNetLemmatizer()
-    #signes_puntuacio = set(string.punctuation + '')
 
     clean_string = [token for token in llista_paraules_lower if not token in stop_words]
     clean_string = [token for token in clean_string if not token.isnumeric()]
@@ -52,42 +51,25 @@ def neteja_paraules(llista_paraules):
     
     return clean_string    
 
-#funciona
+#calcula la probabilitat de que word sigui SPAM o HAM depenent dels parametres que li passem
 def calcular_probabilitat(word, frequencia_paraules,vocTotal,N):
-    # p(x) = (count+K)/(N+(K*|x|))
-    #vocTotal=12
     prob = (frequencia_paraules[word] + constants.K)/(N+(constants.K*vocTotal))
-    #print (word + " ==> " + str(frequencia_paraules[word]))
-    #if word=='subject':
-    #print(word, frequencia_paraules[word], N,vocTotal," = ",prob)
     return prob
 
+#retorna cert si a partir de Bayes el conjunt_paraules_correu calculem que es SPAM, fals si és HAM
 def metode_Bayes( conjunt_paraules_correu, frequencia_paraules_ham, frequencia_paraules_spam, mida_vocabulari, NParaulesHam, NParaulesSpam):
     prob_spam = 0
     prob_ham = 0
-
-    total_paraules = NParaulesHam + NParaulesSpam
     for word in conjunt_paraules_correu:
         prob_spam += math.log(calcular_probabilitat(word,frequencia_paraules_spam, mida_vocabulari, NParaulesSpam))
         prob_ham += math.log(calcular_probabilitat(word,frequencia_paraules_ham, mida_vocabulari, NParaulesHam))
-    #aux_spam += math.log(probabilitat_spam(NParaulesSpam, total_paraules))
-    #aux_ham += math.log(probabilitat_ham(NParaulesHam, total_paraules))
-
-    #prob_spam = aux_spam/(aux_ham+aux_spam)
-    #prob_ham = aux_ham/(aux_ham+aux_spam)
-    #print(prob_spam)
-    #print(prob_ham)
-    #print (math.log(constants.PHI))
     return (prob_spam > (prob_ham + math.log(constants.PHI)))
 
-
-def probabilitat_spam(n_missatges_spam, nombre_paraules_correus):
+#mentre li passem el mateix nombre de correus de HAM que d'SPAM, sempre serà 0.5
+def probabilitat_spam():
     return 0.5
-    #return ((n_missatges_spam + constants.K)/(nombre_paraules_correus + (constants.K*2)))
-    
-def probabilitat_ham(n_missatges_ham, nombre_paraules_correus):
+def probabilitat_ham():
     return 0.5
-    #return ((n_missatges_ham + constants.K)/(nombre_paraules_correus + (constants.K*2)))
 
 def obtenir_paraules_correu(filename):
     return codecs.open(filename, 'r', encoding='utf-8', errors='ignore').read().split()
@@ -126,27 +108,7 @@ def main():
     frequencia_paraules_totals = nltk.FreqDist(llista_paraules_neta_ham+llista_paraules_neta_spam)
     n_missatges_ham = len(llista_paraules_neta_ham) 
     n_missatges_spam = len(llista_paraules_neta_spam) 
-    nombre_paraules_correus = n_missatges_ham + n_missatges_spam # nombre total de paraules no rep
-
     mida_vocabulari = len(frequencia_paraules_totals.items()) #mida total del vocabulari
-    #print (llista_paraules_neta_ham + llista_paraules_neta_spam)
-    #print("aaa", mida_vocabulari)
-    #for key,val in frequencia_paraules_totals.items():
-        #if(key == 'php'):
-            #print (str(key) + ' : ' + str(val))
-
-    # print ("")
-    # print ("Nombre de paruales correus ==> " + str(nombre_paraules_correus))
-    # print ("Mida vocabulari = " + str(mida_vocabulari))
-    # print ("missatges SPAM = " + str(n_missatges_spam))
-    # print ("missatges HAM = " + str(n_missatges_ham))
-    # print ("missatges TOTALS = " + str(nombre_paraules_correus))
-    #print ("PROBABILITAT SPAM = " + str(probabilitat_spam(n_missatges_spam, nombre_paraules_correus)))
-    #print ("PROBABILITAT HAM = " + str(probabilitat_ham(n_missatges_ham, nombre_paraules_correus)))
-
-    #print (llista_paraules_neta_ham)
-    #for key,val in frequencia_paraules_ham.items():
-    #    print (str(key) + ' : ' + str(val))
 
     # Per cada missatge de la carpeta validacioDir...
     validacio_paraules_spam = []
@@ -183,20 +145,6 @@ def main():
                 true_negatiu+=1
 
     print("VALOR DE K => ", constants.K, " VALOR DE PHI => ", constants.PHI)         
-
     calcular_estadistics(n_missatges_ham_validacio, n_missatges_spam_validacio, true_positiu, false_positiu, true_negatiu, false_negatiu)
-
-
-            
-
-    #print total_cost_ratio(9.0,688.0,29443.0,27220.0)
-    #print(', '.join(mails))
-    #print(len(mails))
-
-
-    # |X| -> mida del vocabulari
-    # count(xi) -> nombre de ocurrencies d'una paraula
-    # N -> nombre de paraules entre tots els correus
-    # N -> nombre de paraules de tot ham o spam
 
 main()
