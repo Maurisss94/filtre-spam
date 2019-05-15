@@ -14,7 +14,7 @@ import io
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.stem.lancaster import LancasterStemmer
+from nltk.stem import WordNetLemmatizer
 
 #Definició de varibales globals
 mailDir  = "./mails/ENTRENAMENT"
@@ -41,14 +41,14 @@ def neteja_paraules(llista_paraules):
     llista_paraules_lower = [token.lower() for token in llista_paraules]
     clean_string = llista_paraules_lower
     stop_words = set(stopwords.words('english'))
-    st = LancasterStemmer()
+    st = WordNetLemmatizer()
     #signes_puntuacio = set(string.punctuation + '')
 
     clean_string = [token for token in llista_paraules_lower if not token in stop_words]
     clean_string = [token for token in clean_string if not token.isnumeric()]
     clean_string = [eliminar_puntuacio(token) for token in clean_string]
     clean_string = list(filter(None, clean_string))
-    #clean_string = [st.stem(token) for token in clean_string]
+    #clean_string = [st.lemmatize(token) for token in clean_string]
     
     return clean_string    
 
@@ -78,7 +78,7 @@ def metode_Bayes( conjunt_paraules_correu, frequencia_paraules_ham, frequencia_p
     #print(prob_spam)
     #print(prob_ham)
     #print (math.log(constants.PHI))
-    return (prob_spam > (prob_ham - math.log(constants.PHI)))
+    return (prob_spam > (prob_ham + math.log(constants.PHI)))
 
 
 def probabilitat_spam(n_missatges_spam, nombre_paraules_correus):
@@ -182,7 +182,7 @@ def main():
             elif not es_spam and not bayes:
                 true_negatiu+=1
 
-    print(true_positiu, false_positiu, true_negatiu, false_negatiu)            
+    print("VALOR DE K => ", constants.K, " VALOR DE PHI => ", constants.PHI)         
 
     calcular_estadistics(n_missatges_ham_validacio, n_missatges_spam_validacio, true_positiu, false_positiu, true_negatiu, false_negatiu)
 
