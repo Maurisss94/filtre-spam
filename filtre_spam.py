@@ -19,8 +19,6 @@ from nltk.stem import WordNetLemmatizer
 #Definició de varibales globals
 mailDir  = "./mails/ENTRENAMENT"
 validacioDir  = "./mails/VALIDACIO"
-mails_ham = []
-mails_spam = []
 
 #calcula el costRatio a partir del fals positiu, el fals negatiu, el nombre de missatges de ham i spam
 def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
@@ -90,6 +88,8 @@ def calcular_estadistics(n_missatges_ham, n_missatges_spam, true_positiu, fals_p
     print ("----------------------------------------------------")
 
 def main():
+    mails_ham = []
+    mails_spam = []
     # Lectura de fitxers del directori mailDir
     for directory, subdirs, files in os.walk(mailDir):
         for filename in files:
