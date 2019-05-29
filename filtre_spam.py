@@ -17,8 +17,8 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem import WordNetLemmatizer
 
 #Definició de varibales globals
-mailDir  = "./mails/ENTRENAMENT"
-validacioDir  = "./mails/VALIDACIO"
+mailDir  = "./mails/ENTRENAMENT_FINAL"
+validacioDir  = "./mails/emailscampionat"
 
 #calcula el costRatio a partir del fals positiu, el fals negatiu, el nombre de missatges de ham i spam
 def total_cost_ratio(false_positive, false_negative, n_ham, n_spam):
@@ -45,7 +45,7 @@ def neteja_paraules(llista_paraules):
     clean_string = [token for token in clean_string if not token.isnumeric()]
     clean_string = [eliminar_puntuacio(token) for token in clean_string]
     clean_string = list(filter(None, clean_string))
-    #clean_string = [st.lemmatize(token) for token in clean_string]
+    clean_string = [st.lemmatize(token) for token in clean_string]
     
     return clean_string    
 
